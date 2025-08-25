@@ -52,6 +52,14 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
+		<!-- Kryo序列化工具 -->
+		<dependency>
+			<groupId>com.esotericsoftware</groupId>
+			<artifactId>kryo</artifactId>
+			<version>5.6.2</version>
+		</dependency>
+
+
 		<!-- Other spring dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

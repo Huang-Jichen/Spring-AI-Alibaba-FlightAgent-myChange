@@ -1,7 +1,0 @@
-### Time Tool
-
-### Time tools 1
-GET http://127.0.0.1:8080/time/chat
-
-### Time tools 2
-GET http://127.0.0.1:8080/time/chat-tool-method

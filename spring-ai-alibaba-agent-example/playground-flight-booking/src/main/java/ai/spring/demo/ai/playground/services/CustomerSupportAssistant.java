@@ -18,6 +18,7 @@ package ai.spring.demo.ai.playground.services;
 
 import java.time.LocalDate;
 
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import reactor.core.publisher.Flux;
 
 import org.springframework.ai.chat.client.ChatClient;
@@ -64,9 +65,11 @@ public class CustomerSupportAssistant {
 					""")
 				// 插件组合
 				.defaultAdvisors(
-						PromptChatMemoryAdvisor.builder(chatMemory).build(), // Chat Memory
+						//PromptChatMemoryAdvisor.builder(chatMemory).build(), // Chat Memory
 						// new VectorStoreChatMemoryAdvisor(vectorStore)),
-					
+
+						MessageChatMemoryAdvisor.builder(chatMemory).build(),
+
 						new QuestionAnswerAdvisor(vectorStore), // RAG
 						// new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults()
 						// 	.withFilterExpression("'documentType' == 'terms-of-service' && region in ['EU', 'US']")),

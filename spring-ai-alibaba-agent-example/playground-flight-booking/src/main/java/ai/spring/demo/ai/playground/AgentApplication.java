@@ -1,5 +1,6 @@
 package ai.spring.demo.ai.playground;
 
+import ai.spring.demo.ai.playground.chatmemory.FileBasedChatMemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +73,8 @@ public class AgentApplication  {
 	 */
 	@Bean
 	public ChatMemory chatMemory() {
-		return MessageWindowChatMemory.builder().build();
+		return new FileBasedChatMemory("chat-memory");
+		//return MessageWindowChatMemory.builder().build();
 	}
 
 	/**
