@@ -17,17 +17,26 @@
 package ai.spring.demo.ai.playground.services;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.rag.Query;
+import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.preretrieval.query.expansion.MultiQueryExpander;
+import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
+import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import reactor.core.publisher.Flux;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import static org.springframework.ai.chat.client.advisor.vectorstore.VectorStoreChatMemoryAdvisor.TOP_K;
 import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
@@ -70,7 +79,17 @@ public class CustomerSupportAssistant {
 
 						MessageChatMemoryAdvisor.builder(chatMemory).build(),
 
-						new QuestionAnswerAdvisor(vectorStore), // RAG
+						// RetrievalAugmentationAdvisor基于 RAG 模块化架构，提供了更多的灵活性和定制选项。
+						RetrievalAugmentationAdvisor.builder()
+								.queryTransformers(RewriteQueryTransformer.builder()
+										.chatClientBuilder(modelBuilder.build().mutate())
+										.build())
+								.documentRetriever(VectorStoreDocumentRetriever.builder()
+										.similarityThreshold(0.50)
+										.vectorStore(vectorStore)
+										.build())
+								.build(),
+						//new QuestionAnswerAdvisor(vectorStore), // RAG
 						// new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults()
 						// 	.withFilterExpression("'documentType' == 'terms-of-service' && region in ['EU', 'US']")),
 
@@ -97,5 +116,4 @@ public class CustomerSupportAssistant {
 				.stream()
 				.content();
 	}
-
 }
