@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.reader.TextReader;
+import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -19,6 +21,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.web.client.RestClient;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootApplication
 public class AgentApplication  {
@@ -44,7 +49,25 @@ public class AgentApplication  {
 			 * 2、TokenTextSplitter 按token长度切分文本（避免大文本超出模型限制）
 			 * 3、向量化存储 通过 VectorStore.write() 将文本向量存入内存（后续可用于RAG检索）
 			 */
-			vectorStore.write(new TokenTextSplitter().transform(new TextReader(termsOfServiceDocs).read()));
+			//vectorStore.write(new TokenTextSplitter().transform(new TextReader(termsOfServiceDocs).read()));
+			// 使用自定义的文本分割器
+			TextSplitter paragraphSplitter = new TextSplitter() {
+				@Override
+				protected List<String> splitText(String text) {
+					String[] paragraphs = text.split("\n\n");
+					List<String> result = new ArrayList<>();
+
+					for (String paragraph : paragraphs) {
+						String trimmedParagraph = paragraph.trim();
+						if (!trimmedParagraph.isEmpty()) {
+							result.add(trimmedParagraph);
+						}
+					}
+
+					return result;
+				}
+			};
+			vectorStore.write(paragraphSplitter.transform(new TextReader(termsOfServiceDocs).read()));
 
 			// 相似性搜索检测
 			vectorStore.similaritySearch("Cancelling Bookings").forEach(doc -> {
