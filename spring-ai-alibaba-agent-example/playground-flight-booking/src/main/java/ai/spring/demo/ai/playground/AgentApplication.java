@@ -1,5 +1,6 @@
 package ai.spring.demo.ai.playground;
 
+import ai.spring.demo.ai.playground.Splitter.MyTextSplit;
 import ai.spring.demo.ai.playground.chatmemory.FileBasedChatMemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.client.RestClient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @SpringBootApplication
@@ -39,7 +41,7 @@ public class AgentApplication  {
 	@Bean
 	CommandLineRunner ingestTermOfServiceToVectorStore(
 			VectorStore vectorStore,
-			@Value("classpath:rag/terms-of-service.txt") Resource termsOfServiceDocs
+			@Value("classpath:rag/厦门航空国内客票退改规则.md") Resource termsOfServiceDocs
 	) {
 
 		return args -> {
@@ -51,7 +53,7 @@ public class AgentApplication  {
 			 */
 			//vectorStore.write(new TokenTextSplitter().transform(new TextReader(termsOfServiceDocs).read()));
 			// 使用自定义的文本分割器
-			TextSplitter paragraphSplitter = new TextSplitter() {
+			/*TextSplitter paragraphSplitter = new TextSplitter() {
 				@Override
 				protected List<String> splitText(String text) {
 					String[] paragraphs = text.split("\n\n");
@@ -67,7 +69,20 @@ public class AgentApplication  {
 					return result;
 				}
 			};
-			vectorStore.write(paragraphSplitter.transform(new TextReader(termsOfServiceDocs).read()));
+			vectorStore.write(paragraphSplitter.transform(new TextReader(termsOfServiceDocs).read()));*/
+			// 读取文本文件
+			TextReader textReader = new TextReader(termsOfServiceDocs);
+			/*// 元数据中增加文件名
+			textReader.getCustomMetadata().put("filename", "厦门航空国内客票退改规则.md");
+			// 获取Document对象,只有一个记录
+			List<Document> docList = textReader.read();*/
+			// 指定分割符
+			List<String> splitList = Arrays.asList("。", "！", "？", System.lineSeparator());
+			MyTextSplit splitter = new MyTextSplit(300, 100, 5, 10000, true, splitList);
+			/*List<Document> splitDocuments = splitter.apply(docList);
+			System.out.println(splitDocuments);*/
+
+			vectorStore.write(splitter.transform(new TextReader(termsOfServiceDocs).read()));
 
 			// 相似性搜索检测
 			vectorStore.similaritySearch("Cancelling Bookings").forEach(doc -> {
