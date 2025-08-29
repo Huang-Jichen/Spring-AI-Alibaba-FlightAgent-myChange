@@ -12,14 +12,13 @@
 | --- | --- |
 | 基于大模型理解自然语言需求 | ✅ 保持兼容 |
 | 支持多轮对话 | 🔄 **持久化会话** |
-| 遵守航空规范 | ✅ 引入规则引擎 |
+| 遵守航空规范 | ✅ 引入真实退改规则 |
 | 可调用工具完成任务 | ✅ 支持函数调用 |
 
 ---
 
 ## 📑 目录
 - [快速开始](#-快速开始)
-- [功能亮点](#-功能亮点)
 - [问题修复](#-问题修复)
 - [技术栈](#-技术栈)
 - [参与贡献](#-参与贡献)
@@ -32,4 +31,28 @@
    ```bash
    git clone https://github.com/xxx/spring-ai-alibaba-examples.git
    cd spring-ai-alibaba-examples/ticket-assistant
+
+---
+
+## 🐞 问题修复
+| 原问题 | 解决方案 |
+| --- | --- |
+| 多轮对话无持久化 | 自主实现了基于文件系统的 ChatMemory |
+| TokenTextSplitter 不支持中文文档分块 | 自定义TextSplitter，修改底层源码|
+| 无关输入服务器报错 | 自定义空上下文处理逻辑 |
+
+---
+
+## 🤝 参与贡献
+欢迎 PR / Issue！
+提交前请执行：
+./mvnw spotless:apply
+./mvnw test
+
+---
+
+## 📄 许可证
+Apache 2.0 © 2024 spring-ai-alibaba-examples
+
+
 
