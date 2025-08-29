@@ -46,8 +46,9 @@
 ## 🤝 参与贡献
 欢迎 PR / Issue！
 提交前请执行：
-./mvnw spotless:apply
-./mvnw test
+   ```bash
+   ./mvnw spotless:apply
+   ./mvnw test
 
 ---
 
