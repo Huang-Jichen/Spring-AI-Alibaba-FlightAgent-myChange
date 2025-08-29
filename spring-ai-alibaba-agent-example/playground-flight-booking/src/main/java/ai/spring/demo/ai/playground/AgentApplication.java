@@ -52,35 +52,11 @@ public class AgentApplication  {
 			 * 3、向量化存储 通过 VectorStore.write() 将文本向量存入内存（后续可用于RAG检索）
 			 */
 			//vectorStore.write(new TokenTextSplitter().transform(new TextReader(termsOfServiceDocs).read()));
-			// 使用自定义的文本分割器
-			/*TextSplitter paragraphSplitter = new TextSplitter() {
-				@Override
-				protected List<String> splitText(String text) {
-					String[] paragraphs = text.split("\n\n");
-					List<String> result = new ArrayList<>();
-
-					for (String paragraph : paragraphs) {
-						String trimmedParagraph = paragraph.trim();
-						if (!trimmedParagraph.isEmpty()) {
-							result.add(trimmedParagraph);
-						}
-					}
-
-					return result;
-				}
-			};
-			vectorStore.write(paragraphSplitter.transform(new TextReader(termsOfServiceDocs).read()));*/
 			// 读取文本文件
 			TextReader textReader = new TextReader(termsOfServiceDocs);
-			/*// 元数据中增加文件名
-			textReader.getCustomMetadata().put("filename", "厦门航空国内客票退改规则.md");
-			// 获取Document对象,只有一个记录
-			List<Document> docList = textReader.read();*/
 			// 指定分割符
 			List<String> splitList = Arrays.asList("。", "！", "？", System.lineSeparator());
 			MyTextSplit splitter = new MyTextSplit(300, 100, 5, 10000, true, splitList);
-			/*List<Document> splitDocuments = splitter.apply(docList);
-			System.out.println(splitDocuments);*/
 
 			vectorStore.write(splitter.transform(new TextReader(termsOfServiceDocs).read()));
 

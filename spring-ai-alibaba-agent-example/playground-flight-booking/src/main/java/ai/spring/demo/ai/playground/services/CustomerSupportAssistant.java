@@ -19,11 +19,13 @@ package ai.spring.demo.ai.playground.services;
 import java.time.LocalDate;
 import java.util.List;
 
+import ai.spring.demo.ai.playground.factory.MyContextualQueryAugmenterFactory;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
 import org.springframework.ai.rag.preretrieval.query.expansion.MultiQueryExpander;
 import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
@@ -88,6 +90,8 @@ public class CustomerSupportAssistant {
 										.similarityThreshold(0.50)
 										.vectorStore(vectorStore)
 										.build())
+								//查询增强器，允许模型在没有找到相关文档的情况下也生成回答
+								.queryAugmenter(MyContextualQueryAugmenterFactory.createInstance())
 								.build(),
 						//new QuestionAnswerAdvisor(vectorStore), // RAG
 						// new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults()
