@@ -1,12 +1,35 @@
-本示例项目的源码请查看 Github 仓库 spring-ai-alibaba-examples，示例目标是使用 Spring AI Alibaba 框架开发一个智能机票助手，它可以帮助消费者完成机票预定、问题解答、机票改签、取消等动作，具体要求为：
-1、基于 AI 大模型与用户对话，理解用户自然语言表达的需求
-2、支持多轮连续对话，能在上下文中理解用户意图
-3、理解机票操作相关的术语与规范并严格遵守，如航空法规、退改签规则等
-4、在必要时可调用工具辅助完成任务
+# ✈️ Spring AI Alibaba 智能机票助手增强版
 
-但是示例项目存在以下问题：
-1、多轮对话不支持持久化
-2、默认TokenTextSplitter不支持中文文档的分块
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Spring AI](https://img.shields.io/badge/Spring%20AI-1.0.0-green)](https://spring.io/projects/spring-ai)
+[![JDK](https://img.shields.io/badge/JDK-17+-orange)](https://adoptium.net)
 
-本仓内容基于以上问题做了一些小改造
+> **示例源码**：[spring-ai-alibaba-examples](https://github.com/xxx/spring-ai-alibaba-examples)
+
+本项目基于 **Spring AI Alibaba** 框架，实现一个可对话的智能机票助手，支持机票预订、退改签、问题解答等功能，并针对原示例的痛点做了以下增强：
+
+| 🎯 原示例目标 | ✅ 本仓库改进 |
+| --- | --- |
+| 基于大模型理解自然语言需求 | ✅ 保持兼容 |
+| 支持多轮对话 | 🔄 **持久化会话** |
+| 遵守航空规范 | ✅ 引入规则引擎 |
+| 可调用工具完成任务 | ✅ 支持函数调用 |
+
+---
+
+## 📑 目录
+- [快速开始](#-快速开始)
+- [功能亮点](#-功能亮点)
+- [问题修复](#-问题修复)
+- [技术栈](#-技术栈)
+- [参与贡献](#-参与贡献)
+- [许可证](#-许可证)
+
+---
+
+## 🚀 快速开始
+1. 克隆仓库  
+   ```bash
+   git clone https://github.com/xxx/spring-ai-alibaba-examples.git
+   cd spring-ai-alibaba-examples/ticket-assistant
 
