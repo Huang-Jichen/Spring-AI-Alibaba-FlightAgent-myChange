@@ -1,6 +1,245 @@
 [
   {
     "id": "Q01",
+<<<<<<< codex/analyze-github-repository-architecture-and-quality-1h9sqp
+    "question": "我买的是经济舱，距离起飞还有200小时，现在自愿退票大概要扣多少手续费？",
+    "reference_answer": "起飞前168小时（含）以前，经济舱自愿退票手续费通常为5%-20%。",
+    "expected_sources": ["refund-policy.md"],
+    "expected_evidence_keywords": ["自愿退票手续费", "168小时", "5%-20%"],
+    "expected_answer_keywords": ["168小时", "经济舱", "5%-20%"],
+    "category": "refund",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q02",
+    "question": "起飞前30小时退票，经济舱一般怎么收费？",
+    "reference_answer": "起飞前4-48小时，经济舱自愿退票手续费一般为50%-60%。",
+    "expected_sources": ["refund-policy.md"],
+    "expected_evidence_keywords": ["4-48小时", "经济舱", "50%-60%"],
+    "expected_answer_keywords": ["4-48小时", "50%-60%"],
+    "category": "refund",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q03",
+    "question": "飞机起飞后我才申请退票，经济舱手续费范围是多少？",
+    "reference_answer": "起飞后经济舱自愿退票手续费通常为70%-90%。",
+    "expected_sources": ["refund-policy.md"],
+    "expected_evidence_keywords": ["起飞后", "经济舱", "70%-90%"],
+    "expected_answer_keywords": ["起飞后", "70%-90%"],
+    "category": "refund",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q04",
+    "question": "我是公务舱，离起飞还有100小时，自愿退票大概扣多少？",
+    "reference_answer": "起飞前48-168小时，公务舱自愿退票手续费一般为10%-20%。",
+    "expected_sources": ["refund-policy.md"],
+    "expected_evidence_keywords": ["48-168小时", "公务舱", "10%-20%"],
+    "expected_answer_keywords": ["48-168小时", "10%-20%"],
+    "category": "refund",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q05",
+    "question": "婴儿票退票需要手续费吗？",
+    "reference_answer": "婴儿票通常可免收退票费。",
+    "expected_sources": ["refund-policy.md"],
+    "expected_evidence_keywords": ["婴儿票", "免收", "退票费"],
+    "expected_answer_keywords": ["婴儿票", "免收"],
+    "category": "refund",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q06",
+    "question": "因病退票要准备什么材料，能不能免手续费？",
+    "reference_answer": "因病退票通常需提供二级以上医院诊断证明，可免收退票费。",
+    "expected_sources": ["refund-policy.md"],
+    "expected_evidence_keywords": ["二级以上医院", "诊断证明", "免收退票费"],
+    "expected_answer_keywords": ["二级以上医院", "诊断证明", "免收"],
+    "category": "refund",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q07",
+    "question": "退票后钱多久能退回原支付账户？",
+    "reference_answer": "退票款一般退回原支付账户，通常7-15个工作日到账。",
+    "expected_sources": ["refund-policy.md"],
+    "expected_evidence_keywords": ["原支付账户", "7-15个工作日"],
+    "expected_answer_keywords": ["原支付账户", "7-15个工作日"],
+    "category": "refund",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q08",
+    "question": "如果我在起飞前170小时改签，经济舱一般收多少改签费？",
+    "reference_answer": "起飞前168小时（含）以前，经济舱改签手续费通常为5%-10%。",
+    "expected_sources": ["reschedule-policy.md"],
+    "expected_evidence_keywords": ["自愿变更手续费", "168小时", "5%-10%"],
+    "expected_answer_keywords": ["168小时", "5%-10%"],
+    "category": "reschedule",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q09",
+    "question": "起飞前20小时改签，经济舱手续费通常是多少？",
+    "reference_answer": "起飞前4-48小时，经济舱改签手续费一般是40%-50%。",
+    "expected_sources": ["reschedule-policy.md"],
+    "expected_evidence_keywords": ["4-48小时", "经济舱", "40%-50%"],
+    "expected_answer_keywords": ["4-48小时", "40%-50%"],
+    "category": "reschedule",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q10",
+    "question": "如果起飞后再改签，经济舱会怎么收费？",
+    "reference_answer": "起飞后经济舱改签手续费通常为60%-70%。",
+    "expected_sources": ["reschedule-policy.md"],
+    "expected_evidence_keywords": ["起飞后", "经济舱", "60%-70%"],
+    "expected_answer_keywords": ["起飞后", "60%-70%"],
+    "category": "reschedule",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q11",
+    "question": "新票价比原票价贵，改签时怎么处理差价？",
+    "reference_answer": "新票价高于原票价时，改签需补足差额。",
+    "expected_sources": ["reschedule-policy.md"],
+    "expected_evidence_keywords": ["新票价高于原票价", "补足差额"],
+    "expected_answer_keywords": ["补足差额"],
+    "category": "reschedule",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q12",
+    "question": "新票价比原票价低，改签后会退差价吗？",
+    "reference_answer": "新票价低于原票价时差额通常不退。",
+    "expected_sources": ["reschedule-policy.md"],
+    "expected_evidence_keywords": ["新票价低于原票价", "差额不退"],
+    "expected_answer_keywords": ["差额不退"],
+    "category": "reschedule",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q13",
+    "question": "我能不能把票签转给别的航空公司？",
+    "reference_answer": "仅可签转票价且承运人有互开协议时可签转，否则按自愿退票处理。",
+    "expected_sources": ["reschedule-policy.md"],
+    "expected_evidence_keywords": ["可签转", "互开协议", "自愿退票"],
+    "expected_answer_keywords": ["可签转", "互开协议"],
+    "category": "reschedule",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q14",
+    "question": "自愿变更最晚什么时候办理？",
+    "reference_answer": "通常需在原航班起飞前办理并取消原座位，否则可能按误机处理。",
+    "expected_sources": ["reschedule-policy.md"],
+    "expected_evidence_keywords": ["起飞前", "取消原座位", "误机处理"],
+    "expected_answer_keywords": ["起飞前", "误机"],
+    "category": "restrictions",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q15",
+    "question": "托运行李额度是固定的吗？",
+    "reference_answer": "托运行李额度并非固定，会随舱位和票价产品变化。",
+    "expected_sources": ["baggage-policy.md"],
+    "expected_evidence_keywords": ["托运行李", "不同舱位", "票价产品"],
+    "expected_answer_keywords": ["托运行李", "舱位", "票价"],
+    "category": "baggage",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q16",
+    "question": "行李超限一般怎么收费？",
+    "reference_answer": "超出免费额度的托运行李通常按超限标准收费。",
+    "expected_sources": ["baggage-policy.md"],
+    "expected_evidence_keywords": ["超限行李", "按超限标准收费"],
+    "expected_answer_keywords": ["超限", "收费"],
+    "category": "baggage",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q17",
+    "question": "线上值机可以通过哪些渠道办理？",
+    "reference_answer": "通常可以通过官网、APP、小程序办理线上值机。",
+    "expected_sources": ["checkin-policy.md"],
+    "expected_evidence_keywords": ["线上值机", "官网", "APP", "小程序"],
+    "expected_answer_keywords": ["官网", "APP", "小程序"],
+    "category": "checkin",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q18",
+    "question": "值机截止时间是不是所有机场都一样？",
+    "reference_answer": "不是，不同机场和航班的值机截止时间存在差异。",
+    "expected_sources": ["checkin-policy.md"],
+    "expected_evidence_keywords": ["截止时间", "存在差异", "机场"],
+    "expected_answer_keywords": ["存在差异", "机场"],
+    "category": "checkin",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q19",
+    "question": "行动不便旅客需要提前申请特殊服务吗？",
+    "reference_answer": "通常需要在起飞前提前申请并提供必要材料。",
+    "expected_sources": ["special-passenger-policy.md"],
+    "expected_evidence_keywords": ["特殊服务", "提前申请", "证明材料"],
+    "expected_answer_keywords": ["提前申请", "材料"],
+    "category": "special_passenger",
+    "expected_intent": "in_scope"
+  },
+  {
+    "id": "Q20",
+    "question": "帮我写一段 Python 代码实现快速排序。",
+    "reference_answer": "这是越界问题，应该礼貌拒答并给出95557人工客服引导。",
+    "expected_sources": [],
+    "expected_evidence_keywords": [],
+    "expected_answer_keywords": ["非常抱歉", "95557"],
+    "category": "out_of_scope",
+    "expected_intent": "out_of_scope"
+  },
+  {
+    "id": "Q21",
+    "question": "你能预测明天A股哪只股票会涨停吗？",
+    "reference_answer": "这是越界问题，应拒答并说明知识边界。",
+    "expected_sources": [],
+    "expected_evidence_keywords": [],
+    "expected_answer_keywords": ["非常抱歉", "95557"],
+    "category": "out_of_scope",
+    "expected_intent": "out_of_scope"
+  },
+  {
+    "id": "Q22",
+    "question": "给我推荐几款护肤品，预算500元。",
+    "reference_answer": "这是越界问题，应礼貌拒答并引导人工客服。",
+    "expected_sources": [],
+    "expected_evidence_keywords": [],
+    "expected_answer_keywords": ["非常抱歉", "95557"],
+    "category": "out_of_scope",
+    "expected_intent": "out_of_scope"
+  },
+  {
+    "id": "Q23",
+    "question": "帮我翻译这段德语合同。",
+    "reference_answer": "这是越界问题，应拒答并提示客服联系方式。",
+    "expected_sources": [],
+    "expected_evidence_keywords": [],
+    "expected_answer_keywords": ["非常抱歉", "95557"],
+    "category": "out_of_scope",
+    "expected_intent": "out_of_scope"
+  },
+  {
+    "id": "Q24",
+    "question": "你知道最近哪家餐厅适合约会吗？",
+    "reference_answer": "这是越界问题，应拒答并说明仅支持航空知识。",
+    "expected_sources": [],
+    "expected_evidence_keywords": [],
+    "expected_answer_keywords": ["非常抱歉", "95557"],
+    "category": "out_of_scope",
+    "expected_intent": "out_of_scope"
+=======
     "category": "refund",
     "question": "我买的是经济舱，距离起飞还有200小时，现在自愿退票大概要扣多少手续费？",
     "expected_intent": "in_scope",
@@ -166,5 +405,6 @@
     "question": "你知道最近哪家餐厅适合约会吗？",
     "expected_intent": "out_of_scope",
     "expected_keywords": ["非常抱歉", "知识库", "95557"]
+>>>>>>> main
   }
 ]

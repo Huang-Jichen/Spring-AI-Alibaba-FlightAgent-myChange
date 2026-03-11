@@ -18,27 +18,22 @@ package ai.spring.demo.ai.playground.services;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import ai.spring.demo.ai.playground.factory.MyContextualQueryAugmenterFactory;
-import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
-import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
-import org.springframework.ai.rag.preretrieval.query.expansion.MultiQueryExpander;
 import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import reactor.core.publisher.Flux;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import static org.springframework.ai.chat.client.advisor.vectorstore.VectorStoreChatMemoryAdvisor.TOP_K;
 import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
@@ -55,9 +50,11 @@ import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 public class CustomerSupportAssistant {
 
 	private final ChatClient chatClient;
+	private final VectorStore vectorStore;
 
 	public CustomerSupportAssistant(ChatClient.Builder modelBuilder, VectorStore vectorStore, ChatMemory chatMemory) {
 
+		this.vectorStore = vectorStore;
 		// @formatter:off
 		this.chatClient = modelBuilder
 				.defaultSystem("""
@@ -74,14 +71,8 @@ public class CustomerSupportAssistant {
 
 						今天的日期是 {current_date}.
 					""")
-				// 插件组合
 				.defaultAdvisors(
-						//PromptChatMemoryAdvisor.builder(chatMemory).build(), // Chat Memory
-						// new VectorStoreChatMemoryAdvisor(vectorStore)),
-
 						MessageChatMemoryAdvisor.builder(chatMemory).build(),
-
-						// RetrievalAugmentationAdvisor基于 RAG 模块化架构，提供了更多的灵活性和定制选项。
 						RetrievalAugmentationAdvisor.builder()
 								.queryTransformers(RewriteQueryTransformer.builder()
 										.chatClientBuilder(modelBuilder.build().mutate())
@@ -90,14 +81,8 @@ public class CustomerSupportAssistant {
 										.similarityThreshold(0.50)
 										.vectorStore(vectorStore)
 										.build())
-								//查询增强器，允许模型在没有找到相关文档的情况下也生成回答
 								.queryAugmenter(MyContextualQueryAugmenterFactory.createInstance())
 								.build(),
-						//new QuestionAnswerAdvisor(vectorStore), // RAG
-						// new QuestionAnswerAdvisor(vectorStore, SearchRequest.defaults()
-						// 	.withFilterExpression("'documentType' == 'terms-of-service' && region in ['EU', 'US']")),
-
-						// logger
 						new SimpleLoggerAdvisor()
 				).defaultToolNames(
 						"getBookingDetails",
@@ -113,11 +98,65 @@ public class CustomerSupportAssistant {
 				.system(s -> s.param("current_date", LocalDate.now().toString()))
 				.user(userMessageContent)
 				.advisors(
-						// 设置advisor参数，
-						// 记忆使用chatId，
-						// 拉取最近的100条记录
 						a -> a.param(CONVERSATION_ID, chatId).param(TOP_K, 100))
 				.stream()
 				.content();
+	}
+
+	public EvalResponse eval(String chatId, String question, int topK) {
+		int safeTopK = Math.max(1, Math.min(topK, 20));
+		long start = System.currentTimeMillis();
+
+		List<Document> retrieved = this.vectorStore.similaritySearch(
+				SearchRequest.defaults().withQuery(question).withTopK(safeTopK).withSimilarityThreshold(0.50));
+
+		List<RetrievedDoc> docs = java.util.stream.IntStream.range(0, retrieved.size())
+				.mapToObj(i -> toRetrievedDoc(i + 1, retrieved.get(i)))
+				.toList();
+
+		String finalAnswer = this.chatClient.prompt()
+				.system(s -> s.param("current_date", LocalDate.now().toString()))
+				.user(question)
+				.advisors(a -> a.param(CONVERSATION_ID, chatId).param(TOP_K, 100))
+				.call()
+				.content();
+
+		long latency = System.currentTimeMillis() - start;
+		return new EvalResponse(question, finalAnswer == null ? "" : finalAnswer, latency, docs);
+	}
+
+	private RetrievedDoc toRetrievedDoc(int rank, Document doc) {
+		Map<String, Object> metadata = doc.getMetadata();
+		String source = toStringOrNull(metadata.get("source"));
+		String docType = toStringOrNull(metadata.get("doc_type"));
+		String chunkId = toStringOrNull(metadata.get("chunk_id"));
+		Double score = toDoubleOrNull(metadata.get("score"));
+		return new RetrievedDoc(rank, doc.getText(), source, docType, chunkId, score);
+	}
+
+	private String toStringOrNull(Object value) {
+		return value == null ? null : String.valueOf(value);
+	}
+
+	private Double toDoubleOrNull(Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof Number number) {
+			return number.doubleValue();
+		}
+		try {
+			return Double.parseDouble(String.valueOf(value));
+		}
+		catch (Exception ex) {
+			return null;
+		}
+	}
+
+	public record RetrievedDoc(int rank, String content, String source, String doc_type, String chunk_id, Double score) {
+	}
+
+	public record EvalResponse(String question, String final_answer, long latency_ms,
+							   List<RetrievedDoc> retrieved_documents) {
 	}
 }
