@@ -1,0 +1,170 @@
+[
+  {
+    "id": "Q01",
+    "category": "refund",
+    "question": "我买的是经济舱，距离起飞还有200小时，现在自愿退票大概要扣多少手续费？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["168小时", "经济舱", "5%-20%"]
+  },
+  {
+    "id": "Q02",
+    "category": "refund",
+    "question": "起飞前30小时退票，经济舱一般怎么收费？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["4-48小时", "经济舱", "50%-60%"]
+  },
+  {
+    "id": "Q03",
+    "category": "refund",
+    "question": "飞机起飞后我才申请退票，经济舱手续费范围是多少？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["起飞后", "经济舱", "70%-90%"]
+  },
+  {
+    "id": "Q04",
+    "category": "refund",
+    "question": "我是公务舱，离起飞还有100小时，自愿退票大概扣多少？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["48-168小时", "公务舱", "10%-20%"]
+  },
+  {
+    "id": "Q05",
+    "category": "refund",
+    "question": "婴儿票退票需要手续费吗？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["婴儿票", "免收", "退票费"]
+  },
+  {
+    "id": "Q06",
+    "category": "refund",
+    "question": "因病退票要准备什么材料，能不能免手续费？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["二级以上医院", "诊断证明", "免收退票费"]
+  },
+  {
+    "id": "Q07",
+    "category": "refund",
+    "question": "退票后钱多久能退回原支付账户？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["原支付账户", "7-15个工作日"]
+  },
+  {
+    "id": "Q08",
+    "category": "reschedule",
+    "question": "如果我在起飞前170小时改签，经济舱一般收多少改签费？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["168小时", "经济舱", "5%-10%"]
+  },
+  {
+    "id": "Q09",
+    "category": "reschedule",
+    "question": "起飞前20小时改签，经济舱手续费通常是多少？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["4-48小时", "经济舱", "40%-50%"]
+  },
+  {
+    "id": "Q10",
+    "category": "reschedule",
+    "question": "如果起飞后再改签，经济舱会怎么收费？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["起飞后", "经济舱", "60%-70%"]
+  },
+  {
+    "id": "Q11",
+    "category": "reschedule",
+    "question": "新票价比原票价贵，改签时怎么处理差价？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["新票价高于原票价", "补足差额"]
+  },
+  {
+    "id": "Q12",
+    "category": "reschedule",
+    "question": "新票价比原票价低，改签后会退差价吗？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["新票价低于原票价", "差额不退"]
+  },
+  {
+    "id": "Q13",
+    "category": "reschedule",
+    "question": "我能不能把票签转给别的航空公司？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["可签转", "互开协议", "否则按自愿退票"]
+  },
+  {
+    "id": "Q14",
+    "category": "restrictions",
+    "question": "自愿变更最晚什么时候办理？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["航班起飞前", "取消原座位", "误机处理"]
+  },
+  {
+    "id": "Q15",
+    "category": "restrictions",
+    "question": "自愿退票有没有时间限制？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["客票有效期", "13个月"]
+  },
+  {
+    "id": "Q16",
+    "category": "restrictions",
+    "question": "误机之后再处理退改签，规则怎么适用？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["误机", "自愿变更或自愿退票", "起飞后档"]
+  },
+  {
+    "id": "Q17",
+    "category": "restrictions",
+    "question": "跳段乘机会有什么后果？没坐的航段会退钱吗？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["按顺序使用", "有权拒绝运输", "未使用航段票款不退"]
+  },
+  {
+    "id": "Q18",
+    "category": "restrictions",
+    "question": "非自愿退票（航司原因）全部未使用的客票怎么退？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["全部未使用", "退还全部票款", "不收取退票费"]
+  },
+  {
+    "id": "Q19",
+    "category": "restrictions",
+    "question": "航班延误时，餐食和住宿一定由航司承担吗？",
+    "expected_intent": "in_scope",
+    "expected_keywords": ["厦航原因", "提供餐饮或住宿", "非厦航原因", "费用自理"]
+  },
+  {
+    "id": "Q20",
+    "category": "out_of_scope",
+    "question": "帮我写一段 Python 代码实现快速排序。",
+    "expected_intent": "out_of_scope",
+    "expected_keywords": ["非常抱歉", "95557"]
+  },
+  {
+    "id": "Q21",
+    "category": "out_of_scope",
+    "question": "你能预测明天A股哪只股票会涨停吗？",
+    "expected_intent": "out_of_scope",
+    "expected_keywords": ["非常抱歉", "知识库仅限", "95557"]
+  },
+  {
+    "id": "Q22",
+    "category": "out_of_scope",
+    "question": "给我推荐几款护肤品，预算500元。",
+    "expected_intent": "out_of_scope",
+    "expected_keywords": ["非常抱歉", "暂时无法回答", "95557"]
+  },
+  {
+    "id": "Q23",
+    "category": "out_of_scope",
+    "question": "帮我翻译这段德语合同。",
+    "expected_intent": "out_of_scope",
+    "expected_keywords": ["非常抱歉", "厦门航空出行相关", "95557"]
+  },
+  {
+    "id": "Q24",
+    "category": "out_of_scope",
+    "question": "你知道最近哪家餐厅适合约会吗？",
+    "expected_intent": "out_of_scope",
+    "expected_keywords": ["非常抱歉", "知识库", "95557"]
+  }
+]
