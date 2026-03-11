@@ -6,26 +6,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.reader.TextReader;
-import org.springframework.ai.transformer.splitter.TextSplitter;
-import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @SpringBootApplication
 public class AgentApplication  {
@@ -36,65 +36,80 @@ public class AgentApplication  {
 		new SpringApplicationBuilder(AgentApplication.class).run(args);
 	}
 
-	// In the real world, ingesting documents would often happen separately, on a CI
-	// server or similar.
 	@Bean
-	CommandLineRunner ingestTermOfServiceToVectorStore(
-			VectorStore vectorStore,
-			@Value("classpath:rag/厦门航空国内客票退改规则.md") Resource termsOfServiceDocs
-	) {
+	CommandLineRunner ingestTermOfServiceToVectorStore(VectorStore vectorStore) {
 
 		return args -> {
-			// Ingest the document into the vector store
-			/*
-			 * 1、文档读取TextReader 读取 resources/rag/terms-of-service.txt 文件内容
-			 * 2、TokenTextSplitter 按token长度切分文本（避免大文本超出模型限制）
-			 * 3、向量化存储 通过 VectorStore.write() 将文本向量存入内存（后续可用于RAG检索）
-			 */
-			//vectorStore.write(new TokenTextSplitter().transform(new TextReader(termsOfServiceDocs).read()));
-			// 读取文本文件
-			TextReader textReader = new TextReader(termsOfServiceDocs);
-			// 指定分割符
 			List<String> splitList = Arrays.asList("。", "！", "？", System.lineSeparator());
 			MyTextSplit splitter = new MyTextSplit(300, 100, 5, 10000, true, splitList);
 
-			vectorStore.write(splitter.transform(new TextReader(termsOfServiceDocs).read()));
+			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+			Resource[] resources = resolver.getResources("classpath:rag/*.md");
 
-			// 相似性搜索检测
-			vectorStore.similaritySearch("Cancelling Bookings").forEach(doc -> {
-				logger.info("Similar Document: {}", doc.getText());
+			if (resources.length == 0) {
+				logger.warn("No markdown knowledge files found under classpath:rag/*.md");
+				return;
+			}
+
+			for (Resource resource : resources) {
+				String source = resource.getFilename();
+				String docType = inferDocType(source);
+				List<Document> rawDocuments = new TextReader(resource).read();
+				List<Document> chunks = splitter.transform(rawDocuments);
+
+				for (int i = 0; i < chunks.size(); i++) {
+					Document chunk = chunks.get(i);
+					Map<String, Object> metadata = new HashMap<>(chunk.getMetadata());
+					metadata.put("source", source);
+					metadata.put("doc_type", docType);
+					metadata.put("chunk_id", source + "#" + i);
+					chunks.set(i, new Document(chunk.getId(), chunk.getText(), metadata));
+				}
+
+				vectorStore.write(chunks);
+				logger.info("Ingested knowledge file: {} (doc_type={}) with {} chunks", source, docType, chunks.size());
+			}
+
+			vectorStore.similaritySearch("退票手续费怎么收").forEach(doc -> {
+				logger.info("Sample retrieval: source={}, chunk_id={}",
+						doc.getMetadata().get("source"), doc.getMetadata().get("chunk_id"));
 			});
 		};
 	}
 
-	/**
-	 * 提供基于内存的向量存储（SimpleVectorStore）
-	 * <p>
-	 * 依赖 EmbeddingModel（自动注入，Alibaba的嵌入模型）
-	 * @param embeddingModel
-	 * @return
-	 */
+	private static String inferDocType(String source) {
+		if (!StringUtils.hasText(source)) {
+			return "general";
+		}
+		String lower = source.toLowerCase(Locale.ROOT);
+		if (lower.contains("refund") || source.contains("退票")) {
+			return "refund";
+		}
+		if (lower.contains("reschedule") || source.contains("改签")) {
+			return "reschedule";
+		}
+		if (lower.contains("baggage") || source.contains("行李")) {
+			return "baggage";
+		}
+		if (lower.contains("checkin") || source.contains("值机")) {
+			return "checkin";
+		}
+		if (lower.contains("special") || source.contains("特殊")) {
+			return "special_passenger";
+		}
+		return "general";
+	}
+
 	@Bean
 	public VectorStore vectorStore(EmbeddingModel embeddingModel) {
-
 		return SimpleVectorStore.builder(embeddingModel).build();
 	}
 
-	/**
-	 * 存储多轮对话历史（基于内存）
-	 * 实现上下文感知的连续对话
-	 * @return
-	 */
 	@Bean
 	public ChatMemory chatMemory() {
 		return new FileBasedChatMemory("chat-memory");
-		//return MessageWindowChatMemory.builder().build();
 	}
 
-	/**
-	 * 提供可自定义的HTTP客户端（用于调用外部API）
-	 * @return
-	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public RestClient.Builder restClientBuilder() {
