@@ -108,7 +108,11 @@ public class CustomerSupportAssistant {
 		long start = System.currentTimeMillis();
 
 		List<Document> retrieved = this.vectorStore.similaritySearch(
-				SearchRequest.defaults().withQuery(question).withTopK(safeTopK).withSimilarityThreshold(0.50));
+				SearchRequest.builder()
+					.query(question)
+					.topK(safeTopK)
+					.similarityThreshold(0.50)
+					.build());
 
 		List<RetrievedDoc> docs = java.util.stream.IntStream.range(0, retrieved.size())
 				.mapToObj(i -> toRetrievedDoc(i + 1, retrieved.get(i)))
@@ -123,6 +127,25 @@ public class CustomerSupportAssistant {
 
 		long latency = System.currentTimeMillis() - start;
 		return new EvalResponse(question, finalAnswer == null ? "" : finalAnswer, latency, docs);
+	}
+
+	public RetrievalResponse retrieval(String chatId, String question, int topK) {
+		int safeTopK = Math.max(1, Math.min(topK, 20));
+		long retrievalStart = System.currentTimeMillis();
+
+		List<Document> retrieved = this.vectorStore.similaritySearch(
+				SearchRequest.builder()
+					.query(question)
+					.topK(safeTopK)
+					.similarityThreshold(0.50)
+					.build());
+
+		long retrievalLatency = System.currentTimeMillis() - retrievalStart;
+		List<RetrievedDoc> docs = java.util.stream.IntStream.range(0, retrieved.size())
+				.mapToObj(i -> toRetrievedDoc(i + 1, retrieved.get(i)))
+				.toList();
+
+		return new RetrievalResponse(question, safeTopK, retrievalLatency, docs);
 	}
 
 	private RetrievedDoc toRetrievedDoc(int rank, Document doc) {
@@ -158,5 +181,9 @@ public class CustomerSupportAssistant {
 
 	public record EvalResponse(String question, String final_answer, long latency_ms,
 							   List<RetrievedDoc> retrieved_documents) {
+	}
+
+	public record RetrievalResponse(String question, int top_k, long retrieval_ms,
+									List<RetrievedDoc> retrieved_documents) {
 	}
 }

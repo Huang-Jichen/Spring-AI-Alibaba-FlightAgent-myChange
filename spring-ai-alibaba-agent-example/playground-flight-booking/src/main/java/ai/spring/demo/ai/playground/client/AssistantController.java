@@ -33,4 +33,11 @@ public class AssistantController {
 		return agent.eval(chatId, userMessage, topK);
 	}
 
+	@GetMapping(path = "/retrieval", produces = MediaType.APPLICATION_JSON_VALUE)
+	public CustomerSupportAssistant.RetrievalResponse retrieval(
+			@RequestParam(name = "chatId") String chatId,
+			@RequestParam(name = "userMessage") String userMessage,
+			@RequestParam(name = "topK", defaultValue = "5") int topK) {
+		return agent.retrieval(chatId, userMessage, topK);
+	}
 }

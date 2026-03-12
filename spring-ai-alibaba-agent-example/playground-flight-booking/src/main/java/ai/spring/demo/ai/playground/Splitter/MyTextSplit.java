@@ -20,9 +20,11 @@ public class MyTextSplit extends TextSplitter {
     private static final int MIN_CHUNK_LENGTH_TO_EMBED = 5;
     private static final int MAX_NUM_CHUNKS = 10000;
     private static final boolean KEEP_SEPARATOR = true;
+    private static final int DEFAULT_CHUNK_OVERLAP = 0;
     private final EncodingRegistry registry;
     private final Encoding encoding;
     private final int chunkSize;
+    private final int chunkOverlap;
     private final int minChunkSizeChars;
     private final int minChunkLengthToEmbed;
     private final int maxNumChunks;
@@ -30,24 +32,33 @@ public class MyTextSplit extends TextSplitter {
     private final List<String> splitList;
 
     public MyTextSplit() {
-        this(800, 350, 5, 10000, true, Arrays.asList(".", "!", "?", "\n"));
+        this(DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP, MIN_CHUNK_SIZE_CHARS, MIN_CHUNK_LENGTH_TO_EMBED, MAX_NUM_CHUNKS, KEEP_SEPARATOR, Arrays.asList(".", "!", "?", "\n"));
     }
 
     public MyTextSplit(boolean keepSeparator) {
-        this(800, 350, 5, 10000, keepSeparator, Arrays.asList(".", "!", "?", "\n"));
+        this(DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP, MIN_CHUNK_SIZE_CHARS, MIN_CHUNK_LENGTH_TO_EMBED, MAX_NUM_CHUNKS, keepSeparator, Arrays.asList(".", "!", "?", "\n"));
     }
 
     public MyTextSplit(int chunkSize, int minChunkSizeChars, int minChunkLengthToEmbed, int maxNumChunks, boolean keepSeparator, List<String> splitList) {
+        this(chunkSize, DEFAULT_CHUNK_OVERLAP, minChunkSizeChars, minChunkLengthToEmbed, maxNumChunks, keepSeparator, splitList);
+    }
+
+    public MyTextSplit(int chunkSize, int chunkOverlap, int minChunkSizeChars, int minChunkLengthToEmbed, int maxNumChunks, boolean keepSeparator, List<String> splitList) {
+        Assert.isTrue(chunkSize > 0, "chunkSize must be greater than 0");
+        Assert.isTrue(chunkOverlap >= 0, "chunkOverlap must be greater than or equal to 0");
+        Assert.isTrue(chunkOverlap < chunkSize, "chunkOverlap must be smaller than chunkSize");
         this.registry = Encodings.newLazyEncodingRegistry();
         this.encoding = this.registry.getEncoding(EncodingType.CL100K_BASE);
         this.chunkSize = chunkSize;
+        this.chunkOverlap = chunkOverlap;
         this.minChunkSizeChars = minChunkSizeChars;
         this.minChunkLengthToEmbed = minChunkLengthToEmbed;
         this.maxNumChunks = maxNumChunks;
         this.keepSeparator = keepSeparator;
         if (splitList == null || splitList.isEmpty()) {
             this.splitList = Arrays.asList(".", "!", "?", "\n");
-        } else {
+        }
+        else {
             this.splitList = splitList;
         }
     }
@@ -57,47 +68,70 @@ public class MyTextSplit extends TextSplitter {
     }
 
     protected List<String> doSplit(String text, int chunkSize) {
-        if (text != null && !text.trim().isEmpty()) {
-            List<Integer> tokens = this.getEncodedTokens(text);
-            List<String> chunks = new ArrayList();
-            int num_chunks = 0;
-
-            while (!tokens.isEmpty() && num_chunks < this.maxNumChunks) {
-                List<Integer> chunk = tokens.subList(0, Math.min(chunkSize, tokens.size()));
-                String chunkText = this.decodeTokens(chunk);
-                if (chunkText.trim().isEmpty()) {
-                    tokens = tokens.subList(chunk.size(), tokens.size());
-                } else {
-                    int lastPunctuation = splitList.stream()
-                            .mapToInt(chunkText::lastIndexOf)
-                            .max().orElse(-1);
-                    // 46 .  63 ?  33 !   10换行
-                    // int lastPunctuation = Math.max(chunkText.lastIndexOf(46), Math.max(chunkText.lastIndexOf(63), Math.max(chunkText.lastIndexOf(33), chunkText.lastIndexOf(10))));
-                    if (lastPunctuation != -1 && lastPunctuation > this.minChunkSizeChars) {
-                        chunkText = chunkText.substring(0, lastPunctuation + 1);
-                    }
-
-                    String chunkTextToAppend = this.keepSeparator ? chunkText.trim() : chunkText.replace(System.lineSeparator(), " ").trim();
-                    if (chunkTextToAppend.length() > this.minChunkLengthToEmbed) {
-                        chunks.add(chunkTextToAppend);
-                    }
-
-                    tokens = tokens.subList(this.getEncodedTokens(chunkText).size(), tokens.size());
-                    ++num_chunks;
-                }
-            }
-
-            if (!tokens.isEmpty()) {
-                String remaining_text = this.decodeTokens(tokens).replace(System.lineSeparator(), " ").trim();
-                if (remaining_text.length() > this.minChunkLengthToEmbed) {
-                    chunks.add(remaining_text);
-                }
-            }
-
-            return chunks;
-        } else {
-            return new ArrayList();
+        if (text == null || text.trim().isEmpty()) {
+            return new ArrayList<>();
         }
+
+        List<Integer> allTokens = this.getEncodedTokens(text);
+        List<String> chunks = new ArrayList<>();
+        int start = 0;
+        int numChunks = 0;
+
+        while (start < allTokens.size() && numChunks < this.maxNumChunks) {
+            int end = Math.min(start + chunkSize, allTokens.size());
+            List<Integer> chunkTokens = safeSubList(allTokens, start, end, "chunk window");
+            String chunkText = this.decodeTokens(chunkTokens);
+
+            if (chunkText.trim().isEmpty()) {
+                start = advanceStart(start, chunkTokens.size(), allTokens.size());
+                numChunks++;
+                continue;
+            }
+
+            int lastPunctuation = this.splitList.stream()
+                    .mapToInt(chunkText::lastIndexOf)
+                    .max()
+                    .orElse(-1);
+            if (lastPunctuation != -1 && lastPunctuation > this.minChunkSizeChars) {
+                chunkText = chunkText.substring(0, lastPunctuation + 1);
+            }
+
+            String chunkTextToAppend = this.keepSeparator ? chunkText.trim() : chunkText.replace(System.lineSeparator(), " ").trim();
+            if (chunkTextToAppend.length() > this.minChunkLengthToEmbed) {
+                chunks.add(chunkTextToAppend);
+            }
+
+            int reEncodedTokens = this.getEncodedTokens(chunkText).size();
+            int consumedTokens = Math.min(reEncodedTokens, chunkTokens.size());
+            if (consumedTokens <= 0) {
+                throw new IllegalStateException("Invalid split progress: consumedTokens=" + consumedTokens + ", reEncodedTokens=" + reEncodedTokens + ", start=" + start + ", end=" + end + ", chunkTextLength=" + chunkText.length());
+            }
+            if (reEncodedTokens > chunkTokens.size()) {
+                consumedTokens = chunkTokens.size();
+            }
+
+            start = advanceStart(start, consumedTokens, allTokens.size());
+            numChunks++;
+        }
+
+        return chunks;
+    }
+
+    private int advanceStart(int currentStart, int consumedTokens, int totalTokens) {
+        int nextStart = currentStart + consumedTokens - this.chunkOverlap;
+        if (nextStart <= currentStart) {
+            nextStart = currentStart + 1;
+        }
+        return Math.min(nextStart, totalTokens);
+    }
+
+    private List<Integer> safeSubList(List<Integer> tokens, int fromIndex, int toIndex, String context) {
+        Assert.notNull(tokens, "Tokens must not be null");
+        if (fromIndex < 0 || toIndex < 0 || fromIndex > toIndex || toIndex > tokens.size()) {
+            throw new IllegalArgumentException(
+                    "Invalid subList range for " + context + ": fromIndex=" + fromIndex + ", toIndex=" + toIndex + ", size=" + tokens.size());
+        }
+        return tokens.subList(fromIndex, toIndex);
     }
 
     private List<Integer> getEncodedTokens(String text) {
